@@ -96,6 +96,7 @@ public class MultiWindowAppLaunchActivity extends AppCompatActivity {
         intent.putExtra(EXTRA_APPLICATION_PACKAGE_NAME, componentName.getPackageName());
         intent.putExtra(EXTRA_APPLICATION_ACTIVITY, componentName.getClassName());
         intent.putExtra(EXTRA_CREATE_SHORTCUT, isCreateShortCut);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         return intent;
     }
 }
