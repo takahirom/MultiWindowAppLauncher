@@ -21,13 +21,13 @@ import android.graphics.drawable.Drawable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UserManagerCompatV16 extends UserManagerCompat {
+class UserManagerCompatV16 extends UserManagerCompat {
 
     UserManagerCompatV16() {
     }
 
     public List<UserHandleCompat> getUserProfiles() {
-        List<UserHandleCompat> profiles = new ArrayList<UserHandleCompat>(1);
+        List<UserHandleCompat> profiles = new ArrayList<>(1);
         profiles.add(UserHandleCompat.myUserHandle());
         return profiles;
     }
@@ -37,7 +37,7 @@ public class UserManagerCompatV16 extends UserManagerCompat {
     }
 
     public Drawable getBadgedDrawableForUser(Drawable unbadged,
-            UserHandleCompat user) {
+                                             UserHandleCompat user) {
         return unbadged;
     }
 

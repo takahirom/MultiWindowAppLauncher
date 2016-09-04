@@ -18,30 +18,29 @@ package com.github.takahirom.multiwindowapplauncher.compat;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 
 
 import java.util.List;
 
-public abstract class UserManagerCompat {
-    protected UserManagerCompat() {
+abstract class UserManagerCompat {
+    UserManagerCompat() {
     }
 
-    private static final Object sInstanceLock = new Object();
-    private static UserManagerCompat sInstance;
+    private static final Object instanceLock = new Object();
+    private static UserManagerCompat instance;
 
     public static UserManagerCompat getInstance(Context context) {
-        synchronized (sInstanceLock) {
-            if (sInstance == null) {
+        synchronized (instanceLock) {
+            if (instance == null) {
                 if (Utilities.ATLEAST_LOLLIPOP) {
-                    sInstance = new UserManagerCompatVL(context.getApplicationContext());
+                    instance = new UserManagerCompatVL(context.getApplicationContext());
                 } else if (Utilities.ATLEAST_JB_MR1) {
-                    sInstance = new UserManagerCompatV17(context.getApplicationContext());
+                    instance = new UserManagerCompatV17(context.getApplicationContext());
                 } else {
-                    sInstance = new UserManagerCompatV16();
+                    instance = new UserManagerCompatV16();
                 }
             }
-            return sInstance;
+            return instance;
         }
     }
 
@@ -51,9 +50,14 @@ public abstract class UserManagerCompat {
     public abstract void enableAndResetCache();
 
     public abstract List<UserHandleCompat> getUserProfiles();
+
     public abstract long getSerialNumberForUser(UserHandleCompat user);
+
     public abstract UserHandleCompat getUserForSerialNumber(long serialNumber);
+
     public abstract Drawable getBadgedDrawableForUser(Drawable unbadged, UserHandleCompat user);
+
     public abstract CharSequence getBadgedLabelForUser(CharSequence label, UserHandleCompat user);
+
     public abstract long getUserCreationTime(UserHandleCompat user);
 }

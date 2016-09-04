@@ -41,7 +41,6 @@ import rx.schedulers.Schedulers;
 public class MainActivity extends AppCompatActivity {
 
     private ProgressDialog progressDialog;
-    private PackageManager packageManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,27 +55,9 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    static class App {
-        String packageName;
-        String name;
-        Bitmap icon;
-
-        public App(Context context, String packageName, String title) {
-            this.packageName = packageName;
-        }
-
-        public String getPackageName() {
-            if (packageName == null) {
-
-            }
-            return packageName;
-        }
-    }
-
     private void startLoading() {
         progressDialog = new ProgressDialog(MainActivity.this);
         progressDialog.show();
-        this.packageManager = getPackageManager();
 
         Observable
                 .fromAsync(new Action1<AsyncEmitter<List<LauncherActivityInfoCompat>>>() {

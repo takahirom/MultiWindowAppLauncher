@@ -27,7 +27,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.graphics.Rect;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 
@@ -39,50 +38,50 @@ import java.util.List;
  * Devices Pre-L don't support multiple profiles in one launcher so
  * user parameters are ignored and all methods operate on the current user.
  */
-public class LauncherAppsCompatV16 extends LauncherAppsCompat {
+class LauncherAppsCompatV16 extends LauncherAppsCompat {
 
-    private PackageManager mPm;
-    private Context mContext;
-    private List<OnAppsChangedCallbackCompat> mCallbacks
-            = new ArrayList<OnAppsChangedCallbackCompat>();
-    private PackageMonitor mPackageMonitor;
+    private PackageManager pm;
+    private Context context;
+    private List<OnAppsChangedCallbackCompat> callbacks
+            = new ArrayList<>();
+    private PackageMonitor packageMonitor;
 
     LauncherAppsCompatV16(Context context) {
-        mPm = context.getPackageManager();
-        mContext = context;
-        mPackageMonitor = new PackageMonitor();
-   }
+        pm = context.getPackageManager();
+        this.context = context;
+        packageMonitor = new PackageMonitor();
+    }
 
     public List<LauncherActivityInfoCompat> getActivityList(String packageName,
-            UserHandleCompat user) {
+                                                            UserHandleCompat user) {
         final Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
         mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
         mainIntent.setPackage(packageName);
-        List<ResolveInfo> infos = mPm.queryIntentActivities(mainIntent, 0);
+        List<ResolveInfo> infos = pm.queryIntentActivities(mainIntent, 0);
         List<LauncherActivityInfoCompat> list =
-                new ArrayList<LauncherActivityInfoCompat>(infos.size());
+                new ArrayList<>(infos.size());
         for (ResolveInfo info : infos) {
-            list.add(new LauncherActivityInfoCompatV16(mContext, info));
+            list.add(new LauncherActivityInfoCompatV16(context, info));
         }
         return list;
     }
 
     public LauncherActivityInfoCompat resolveActivity(Intent intent, UserHandleCompat user) {
-        ResolveInfo info = mPm.resolveActivity(intent, 0);
+        ResolveInfo info = pm.resolveActivity(intent, 0);
         if (info != null) {
-            return new LauncherActivityInfoCompatV16(mContext, info);
+            return new LauncherActivityInfoCompatV16(context, info);
         }
         return null;
     }
 
     public void startActivityForProfile(ComponentName component, UserHandleCompat user,
-            Rect sourceBounds, Bundle opts) {
+                                        Rect sourceBounds, Bundle opts) {
         Intent launchIntent = new Intent(Intent.ACTION_MAIN);
         launchIntent.addCategory(Intent.CATEGORY_LAUNCHER);
         launchIntent.setComponent(component);
         launchIntent.setSourceBounds(sourceBounds);
         launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        mContext.startActivity(launchIntent, opts);
+        context.startActivity(launchIntent, opts);
     }
 
     public void showAppDetailsForProfile(ComponentName component, UserHandleCompat user) {
@@ -91,32 +90,32 @@ public class LauncherAppsCompatV16 extends LauncherAppsCompat {
                 Uri.fromParts("package", packageName, null));
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |
                 Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-        mContext.startActivity(intent, null);
+        context.startActivity(intent, null);
     }
 
     public synchronized void addOnAppsChangedCallback(OnAppsChangedCallbackCompat callback) {
-        if (callback != null && !mCallbacks.contains(callback)) {
-            mCallbacks.add(callback);
-            if (mCallbacks.size() == 1) {
+        if (callback != null && !callbacks.contains(callback)) {
+            callbacks.add(callback);
+            if (callbacks.size() == 1) {
                 registerForPackageIntents();
             }
         }
     }
 
     public synchronized void removeOnAppsChangedCallback(OnAppsChangedCallbackCompat callback) {
-        mCallbacks.remove(callback);
-        if (mCallbacks.size() == 0) {
+        callbacks.remove(callback);
+        if (callbacks.size() == 0) {
             unregisterForPackageIntents();
         }
     }
 
     public boolean isPackageEnabledForProfile(String packageName, UserHandleCompat user) {
-        return isAppEnabled(mPm, packageName, 0);
+        return isAppEnabled(pm, packageName, 0);
     }
 
     public boolean isActivityEnabledForProfile(ComponentName component, UserHandleCompat user) {
         try {
-            ActivityInfo info = mPm.getActivityInfo(component, 0);
+            ActivityInfo info = pm.getActivityInfo(component, 0);
             return info != null && info.isEnabled();
         } catch (NameNotFoundException e) {
             return false;
@@ -124,7 +123,7 @@ public class LauncherAppsCompatV16 extends LauncherAppsCompat {
     }
 
     private void unregisterForPackageIntents() {
-        mContext.unregisterReceiver(mPackageMonitor);
+        context.unregisterReceiver(packageMonitor);
     }
 
     private void registerForPackageIntents() {
@@ -132,15 +131,15 @@ public class LauncherAppsCompatV16 extends LauncherAppsCompat {
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         filter.addDataScheme("package");
-        mContext.registerReceiver(mPackageMonitor, filter);
+        context.registerReceiver(packageMonitor, filter);
         filter = new IntentFilter();
         filter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE);
         filter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
-        mContext.registerReceiver(mPackageMonitor, filter);
+        context.registerReceiver(packageMonitor, filter);
     }
 
     synchronized List<OnAppsChangedCallbackCompat> getCallbacks() {
-        return new ArrayList<OnAppsChangedCallbackCompat>(mCallbacks);
+        return new ArrayList<>(callbacks);
     }
 
     class PackageMonitor extends BroadcastReceiver {
